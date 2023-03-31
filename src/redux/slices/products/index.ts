@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Details } from "../../../interface/index";
 import axios from "axios";
-import { RootState } from "../../store";
 
 //AQUI INTERFACE DESPUES VEMOS SI LA CAMBIAMOS A OTRA CARPETA
 export interface ProductState {
   products: Details[];
   productDetails: Details | null;
+  shoppingCart: number;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
@@ -15,6 +15,7 @@ export interface ProductState {
 const initialState: ProductState = {
   products: [],
   productDetails: null,
+  shoppingCart: 0,
   status: "idle",
   error: null,
 };
@@ -69,9 +70,5 @@ const productSlice = createSlice({
       });
   },
 });
-export const selectProductDetails = (state: RootState) =>
-  state.product.productDetails;
-export const selectProductList = (state: RootState) => state.product.products;
-export const selectProductStatus = (state: RootState) => state.product.status;
-export const selectProductError = (state: RootState) => state.product.error;
+
 export default productSlice.reducer;
