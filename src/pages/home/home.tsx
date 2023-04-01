@@ -1,27 +1,28 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
-import { fetchProductList, ProductState } from "../../redux/slices/products";
+import { productList } from "../../redux/slices/products";
 import Product from "../../components/product/product";
+import { ProductState } from "../../interface";
+import Search from "../../components/search/search";
 
 const Home: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
-  const { products, status, error } = useSelector<RootState, ProductState>(
+  const { products, isLoading, error } = useSelector<RootState, ProductState>(
     (state) => state.product
   );
   useEffect(() => {
-    dispatch(fetchProductList("http://localhost:3001/products"));
+    dispatch(productList());
   }, [dispatch]);
-  if (status === "loading") {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (error) {
-    return <div>{error}</div>;
-  }
   return (
     <>
       <h1>Home</h1>
+      <Search />
+      {error && <div>{error}</div>}
       <div
         style={{
           width: "80%",

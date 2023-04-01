@@ -11,5 +11,13 @@ export interface Details {
 }
 export interface Pruducto {
   products: Details[];
-  newProduct: Details;
+}
+
+export interface ProductState {
+  products: Details[];
+  auxiliarProducst: Details[];
+  productDetails: Details | null;
+  shoppingCart: number;
+  isLoading: boolean;
+  error: string;
 }

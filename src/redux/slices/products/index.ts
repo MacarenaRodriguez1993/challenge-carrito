@@ -1,74 +1,114 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { Details } from "../../../interface/index";
-import axios from "axios";
-
-//AQUI INTERFACE DESPUES VEMOS SI LA CAMBIAMOS A OTRA CARPETA
-export interface ProductState {
-  products: Details[];
-  productDetails: Details | null;
-  shoppingCart: number;
-  status: "idle" | "loading" | "succeeded" | "failed";
-  error: string | null;
-}
+import {
+  createSlice,
+  PayloadAction,
+  ThunkAction,
+  Action,
+} from "@reduxjs/toolkit";
+import { Details, ProductState } from "../../../interface/index";
+import axios, { AxiosResponse, AxiosError } from "axios";
+import { RootState } from "../../store";
 
 // INICIAMOS EL ESTADO
 const initialState: ProductState = {
   products: [],
+  auxiliarProducst: [],
   productDetails: null,
   shoppingCart: 0,
-  status: "idle",
-  error: null,
+  isLoading: false,
+  error: "",
 };
 
-//ACTIONS ASINCRONICA PARA TRAER TODOS LOS PRODUCTOS
-export const fetchProductList = createAsyncThunk(
-  "products/fetchingProducts",
-  async (url: string) => {
-    const response = await axios(url);
-    const data = response.data;
-    return data;
-  }
-);
-//ACTIONS ASINCRONICA PARA TRAER UN PRODUCTO POR ID
-export const fetchProductById = createAsyncThunk(
-  "product/fetchById",
-  async (url: string) => {
-    const response = await fetch(url);
-    const data = await response.json();
-    return data;
-  }
-);
+//ACTIONS PARA TRAER TODOS LOS PRODUCTOS
+export const productList =
+  (): ThunkAction<Promise<unknown>, RootState, unknown, Action<unknown>> =>
+  async (dispatch): Promise<AxiosResponse | AxiosError> => {
+    dispatch(setIsLoading(true));
+    try {
+      const response: AxiosResponse = await axios.get(
+        "http://localhost:3001/products"
+      );
+      dispatch(getProducts(response.data));
+      return response;
+    } catch (error) {
+      return error as AxiosError;
+    } finally {
+      dispatch(setIsLoading(false));
+    }
+  };
+//ACTION PARA TRAER DATOS POR SU ID
+export const detailsProduct =
+  (
+    _id: string
+  ): ThunkAction<Promise<unknown>, RootState, unknown, Action<unknown>> =>
+  async (dispatch): Promise<AxiosResponse | AxiosError> => {
+    dispatch(setIsLoading(true));
+    try {
+      const response: AxiosResponse = await axios.get(
+        `http://localhost:3001/products/${_id}`
+      );
+      dispatch(productById(response.data));
+      return response;
+    } catch (error) {
+      return error as AxiosError;
+    } finally {
+      dispatch(setIsLoading(false));
+    }
+  };
+//ACTION PARA FILTRAR PRODUCTOS POR NOMBRE
+export const filterProductsByName =
+  (searchTerm: string): ThunkAction<void, RootState, unknown, Action<string>> =>
+  (dispatch, getState) => {
+    console.log(searchTerm);
+    const { products, auxiliarProducst } = getState().product;
+
+    const productFiltrados = auxiliarProducst;
+    if (searchTerm === "") {
+      dispatch(searchProduct(productFiltrados));
+      dispatch(setError(""));
+    } else {
+      const filteredProducts = products.filter((product) =>
+        product.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      console.log(filteredProducts);
+      if (filteredProducts.length === 0) {
+        dispatch(setError(`${searchTerm} Not Found `));
+      }
+      dispatch(searchProduct(filteredProducts));
+    }
+  };
 
 //slice
 const productSlice = createSlice({
   name: "product",
   initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchProductById.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(fetchProductById.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.productDetails = action.payload;
-      })
-      .addCase(fetchProductById.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message ?? "Something went wrong";
-      })
-      .addCase(fetchProductList.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(fetchProductList.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.products = action.payload;
-      })
-      .addCase(fetchProductList.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message ?? "Something went wrong";
-      });
+  reducers: {
+    getProducts: (state, action: PayloadAction<Details[]>) => {
+      state.products = action.payload;
+      state.auxiliarProducst = action.payload;
+    },
+    productById: (state, action: PayloadAction<Details>) => {
+      state.productDetails = action.payload;
+    },
+    setIsLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
+    setError: (state, action: PayloadAction<string>) => {
+      state.error = action.payload;
+    },
+    addShopping: (state) => {
+      state.shoppingCart += 1;
+    },
+    searchProduct: (state, action: PayloadAction<Details[]>) => {
+      state.products = action.payload;
+    },
   },
 });
-
+export const {
+  getProducts,
+  productById,
+  setIsLoading,
+  setError,
+  addShopping,
+  searchProduct,
+} = productSlice.actions;
 export default productSlice.reducer;
