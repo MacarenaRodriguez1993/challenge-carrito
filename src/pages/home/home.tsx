@@ -12,8 +12,12 @@ const Home: React.FC = () => {
     (state) => state.product
   );
   useEffect(() => {
-    dispatch(productList());
-  }, [dispatch]);
+    if (products.length === 0) {
+      dispatch(productList());
+    }
+
+    //localStorage.setItem("productis", JSON.stringify(producis));
+  }, [dispatch, products]);
   if (isLoading) {
     return <div>Loading...</div>;
   }

@@ -58,18 +58,15 @@ export const detailsProduct =
 export const filterProductsByName =
   (searchTerm: string): ThunkAction<void, RootState, unknown, Action<string>> =>
   (dispatch, getState) => {
-    console.log(searchTerm);
     const { products, auxiliarProducst } = getState().product;
-
     const productFiltrados = auxiliarProducst;
     if (searchTerm === "") {
       dispatch(searchProduct(productFiltrados));
       dispatch(setError(""));
     } else {
-      const filteredProducts = products.filter((product) =>
+      const filteredProducts = products.filter((product: Details) =>
         product.name?.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      console.log(filteredProducts);
       if (filteredProducts.length === 0) {
         dispatch(setError(`${searchTerm} Not Found `));
       }
