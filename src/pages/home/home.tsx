@@ -6,17 +6,17 @@ import Product from "../../components/product/product";
 import { ProductState } from "../../interface";
 import Search from "../../components/search/search";
 
+import { ButtonStyled } from "./HomeStyles";
 const Home: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const { products, isLoading, error } = useSelector<RootState, ProductState>(
     (state) => state.product
   );
+
   useEffect(() => {
     if (products.length === 0) {
       dispatch(productList());
     }
-
-    //localStorage.setItem("productis", JSON.stringify(producis));
   }, [dispatch, products]);
   if (isLoading) {
     return <div>Loading...</div>;
@@ -27,6 +27,7 @@ const Home: React.FC = () => {
       <h1>Home</h1>
       <Search />
       {error && <div>{error}</div>}
+
       <div
         style={{
           width: "80%",
@@ -46,6 +47,7 @@ const Home: React.FC = () => {
           />
         ))}
       </div>
+      <ButtonStyled>BUTTON STYLED</ButtonStyled>
     </>
   );
 };

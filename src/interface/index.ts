@@ -21,3 +21,7 @@ export interface ProductState {
   isLoading: boolean;
   error: string;
 }
+
+export interface SettingState {
+  themeMode: string;
+}
